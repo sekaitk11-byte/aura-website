@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIMITLESS | Global System</title>
+    <style>
+        :root {
+            --neon-blue: #00d4ff;
+            --dark-bg: #050608;
+            --rank-s: #ff0055;
+            --gold: #ffcc00;
+            --panel: rgba(10, 12, 18, 0.98);
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            background: var(--dark-bg);
+            color: #e0e0e0;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .system-container {
+            width: 100%;
+            max-width: 480px;
+            padding: 20px;
+            box-sizing: border-box;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-left: 4px solid var(--neon-blue);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        h2, h3 { color: var(--neon-blue); text-transform: uppercase; letter-spacing: 3px; margin-top: 0; font-weight: 300; }
+
+        /* Rank UI */
+        .rank-display {
+            font-size: 5rem; font-weight: 900; text-align: center; margin: 10px 0;
+            text-shadow: 0 0 20px var(--neon-blue);
+        }
+        .rank-s-mode { color: var(--rank-s) !important; text-shadow: 0 0 40px var(--rank-s) !important; }
+
+        /* Leaderboard Styling */
+        .leaderboard-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
+        .leaderboard-table th { text-align: left; color: var(--neon-blue); padding-bottom: 10px; border-bottom: 1px solid #222; }
+        .leaderboard-table td { padding: 12px 0; border-bottom: 1px solid #111; }
+        .current-user { color: var(--gold); background: rgba(255, 204, 0, 0.05); }
+        .badge { padding: 2px 6px; border-radius: 3px; font-size: 0.7rem; font-weight: bold; margin-left: 5px; }
+        .badge-world { background: var(--neon-blue); color: black; }
+        .badge-local { background: #555; color: white; }
+
+        /* Navigation Tabs */
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab-btn { 
+            flex: 1; padding: 10px; background: rgba(255,255,255,0.05); border: 1px solid #333; 
+            color: #888; cursor: pointer; text-transform: uppercase; font-size: 0.7rem; 
+        }
+        .tab-btn.active { border-color: var(--neon-blue); color: var(--neon-blue); background: rgba(0, 212, 255, 0.05); }
+
+        .bar-container { background: rgba(255,255,255,0.05); height: 6px; border-radius: 3px; margin: 15px 0; overflow: hidden; }
+        .bar-fill { height: 100%; background: var(--neon-blue); width: 0%; transition: width 1.2s ease; }
+
+        .btn {
+            width: 100%; padding: 15px; background: transparent; border: 1px solid var(--neon-blue);
+            color: var(--neon-blue); font-weight: bold; cursor: pointer; text-transform: uppercase;
+            letter-spacing: 2px; border-radius: 4px; transition: 0.3s;
+        }
+        .btn:hover { background: var(--neon-blue); color: black; box-shadow: 0 0 20px rgba(0, 212, 255, 0.3); }
+
+        .hidden { display: none; }
+        input { width: 100%; padding: 12px; background: #000; border: 1px solid #333; color: white; margin-bottom: 15px; box-sizing: border-box; }
+        #preview-img { width: 100%; border-radius: 8px; margin-top: 10px; border: 1px solid #333; }
+    </style>
+</head>
+<body>
+
+<div class="system-container">
+    <div id="screen-auth" class="card">
+        <h2>[ System Registry ]</h2>
+        <input type="text" id="username" placeholder="HUNTER ALIAS">
+        <input type="text" id="location" placeholder="LOCATION (e.g. New York, Tokyo)">
+        <button class="btn" onclick="awaken()">Initialize System</button>
+    </div>
+
+    <div id="screen-main" class="hidden">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('dashboard')">Quests</button>
+            <button class="tab-btn" onclick="switchTab('leaderboard')">Ranking</button>
+            <button class="tab-btn" onclick="switchTab('glowup')">Glow Up</button>
+        </div>
+
+        <div id="tab-dashboard">
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; font-size:0.7rem;">
+                    <span id="ui-user">---</span>
+                    <span id="ui-rank-name" style="color:var(--neon-blue)">F-RANK</span>
+                </div>
+                <div class="rank-display" id="ui-rank-letter">F</div>
+                <div class="bar-container"><div id="ui-bar" class="bar-fill"></div></div>
+                <p id="ui-points" style="text-align:center; font-size:0.8rem; color:var(--gold)">POINTS: 0</p>
+                <button class="btn" style="font-size:0.7rem; border-color:var(--gold); color:var(--gold);" onclick="activateVoice()">[ AUTHENTICATE SYSTEM VOICE ]</button>
+            </div>
+            
+            <div class="card">
+                <h3>[ Daily Quests ]</h3>
+                <div id="quest-list" style="font-size:0.85rem; line-height:2;"></div>
+            </div>
+        </div>
+
+        <div id="tab-leaderboard" class="hidden">
+            <div class="card">
+                <h3>[ World Ranking ]</h3>
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr><th>Rank</th><th>Hunter</th><th>Points</th><th>Level</th></tr>
+                    </thead>
+                    <tbody id="world-leaderboard-body"></tbody>
+                </table>
+            </div>
+            <div class="card">
+                <h3>[ Local Ranking: <span id="ui-local-area">---</span> ]</h3>
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr><th>Rank</th><th>Hunter</th><th>Points</th></tr>
+                    </thead>
+                    <tbody id="local-leaderboard-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="tab-glowup" class="hidden">
+            <div class="card">
+                <h3>[ AI Facial Analysis ]</h3>
+                <input type="file" id="file-input" accept="image/*" onchange="submitEvidence(this)">
+                <img id="preview-img" class="hidden">
+                <div id="ai-report" class="hidden" style="margin-top:15px; font-size:0.85rem; color:#88ccff; border-left:2px solid var(--neon-blue); padding-left:10px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const synth = window.speechSynthesis;
+    let state = {
+        name: "", 
+        location: "",
+        points: 0,
+        rankIdx: 0, 
+        streak: 0, 
+        voiceOn: false,
+        ranks: ["F", "E", "D", "C", "B", "A", "S", "SS", "SSS", "SSSS"]
+    };
+
+    // Simulated Global Data
+    const mockHunters = [
+        { name: "JinWoo_99", points: 15400, rank: "S", loc: "Seoul" },
+        { name: "ShadowHunter", points: 12100, rank: "A", loc: "Tokyo" },
+        { name: "IronFist", points: 8900, rank: "B", loc: "New York" },
+        { name: "Slayer_X", points: 4500, rank: "C", loc: "London" },
+        { name: "Viper", points: 2100, rank: "D", loc: "Seoul" }
+    ];
+
+    function systemSpeak(text) {
+        if (!state.voiceOn) return;
+        synth.cancel();
+        const msg = new SpeechSynthesisUtterance(text);
+        const voices = synth.getVoices();
+        const femaleVoice = voices.find(v => (v.name.includes("Female") || v.name.includes("Google") || v.name.includes("Zira")) && v.lang.includes("en"));
+        if (femaleVoice) msg.voice = femaleVoice;
+        msg.pitch = 1.1;
+        msg.rate = 1.0;
+        synth.speak(msg);
+    }
+
+    function activateVoice() {
+        state.voiceOn = true;
+        systemSpeak("Global connection established. System voice authenticated.");
+    }
+
+    function awaken() {
+        state.name = document.getElementById('username').value || "Hunter";
+        state.location = document.getElementById('location').value || "Unknown Sector";
+        
+        document.getElementById('screen-auth').classList.add('hidden');
+        document.getElementById('screen-main').classList.remove('hidden');
+        
+        document.getElementById('ui-user').innerText = state.name.toUpperCase();
+        document.getElementById('ui-local-area').innerText = state.location.toUpperCase();
+        
+        state.voiceOn = true;
+        systemSpeak(`Welcome Hunter ${state.name}. You have been placed in the ${state.location} local sector. Complete quests to rise in world ranking.`);
+        
+        updateLeaderboards();
+        generateQuests();
+    }
+
+    function switchTab(tab) {
+        ['dashboard', 'leaderboard', 'glowup'].forEach(t => {
+            document.getElementById(`tab-${t}`).classList.add('hidden');
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        });
+        document.getElementById(`tab-${tab}`).classList.remove('hidden');
+        event.target.classList.add('active');
+        
+        if(tab === 'leaderboard') updateLeaderboards();
+    }
+
+    function generateQuests() {
+        const m = state.rankIdx + 1;
+        const quests = [
+            `Pushups: ${10 * m}`, `Squats: ${15 * m}`, `Running: ${2 * m}km`
+        ];
+        document.getElementById('quest-list').innerHTML = quests.map(q => `<div>🔘 ${q}</div>`).join('');
+    }
+
+    function submitEvidence(input) {
+        if (!input.files[0]) return;
+        
+        systemSpeak("Initiating facial scan. Accessing global health database for acne analysis.");
+        
+        setTimeout(() => {
+            state.streak++;
+            state.points += 500;
+            const report = `[AI REPORT]: Skin markers indicate sugar-induced inflammation. Strategy: 4 liters of water daily, zero dairy. Potential: 95%.`;
+            const rDiv = document.getElementById('ai-report');
+            rDiv.innerText = report;
+            rDiv.classList.remove('hidden');
+            
+            systemSpeak(`Verification success. Points awarded. ${report}`);
+            updateUI();
+            if (state.streak >= 7) evolve();
+        }, 2000);
+    }
+
+    function evolve() {
+        state.rankIdx++;
+        state.streak = 0;
+        state.points += 2000;
+        systemSpeak(`Warning. Transcendence detected. You have reached ${state.ranks[state.rankIdx]} Rank.`);
+        updateUI();
+    }
+
+    function updateUI() {
+        const rank = state.ranks[state.rankIdx];
+        document.getElementById('ui-rank-letter').innerText = rank;
+        document.getElementById('ui-rank-name').innerText = rank + "-RANK";
+        document.getElementById('ui-points').innerText = `POINTS: ${state.points}`;
+        document.getElementById('ui-bar').style.width = (state.streak / 7 * 100) + "%";
+        if(state.rankIdx >= 6) document.getElementById('ui-rank-letter').classList.add('rank-s-mode');
+    }
+
+    function updateLeaderboards() {
+        // WORLD BOARD
+        const worldBody = document.getElementById('world-leaderboard-body');
+        let hunters = [...mockHunters, { name: state.name, points: state.points, rank: state.ranks[state.rankIdx], loc: state.location }];
+        hunters.sort((a, b) => b.points - a.points);
+        
+        worldBody.innerHTML = hunters.slice(0, 6).map((h, i) => `
+            <tr class="${h.name === state.name ? 'current-user' : ''}">
+                <td>${i+1}</td>
+                <td>${h.name} ${h.name === state.name ? '<span class="badge badge-world">YOU</span>' : ''}</td>
+                <td>${h.points}</td>
+                <td>${h.rank}</td>
+            </tr>
+        `).join('');
+
+        // LOCAL BOARD (Filter by location)
+        const localBody = document.getElementById('local-leaderboard-body');
+        const localHunters = hunters.filter(h => h.loc.toLowerCase() === state.location.toLowerCase());
+        localBody.innerHTML = localHunters.map((h, i) => `
+            <tr class="${h.name === state.name ? 'current-user' : ''}">
+                <td>${i+1}</td>
+                <td>${h.name}</td>
+                <td>${h.points}</td>
+            </tr>
+        `).join('');
+    }
+
+    window.speechSynthesis.onvoiceschanged = () => synth.getVoices();
+</script>
+
+</body>
+</html>
