@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE SYSTEM: ASCENSION</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&display=swap');
+        :root { --sys-blue: #00f2ff; --sys-gold: #ffcc00; --sys-red: #ff004c; --bg: #050a14; }
+        body { background: var(--bg); color: #fff; font-family: 'Orbitron', sans-serif; margin: 0; padding-bottom: 80px; }
+        
+        /* UI COMPONENTS */
+        .glass-panel { background: rgba(0, 242, 255, 0.05); border: 1px solid var(--sys-blue); margin: 15px; padding: 20px; box-shadow: 0 0 15px rgba(0, 242, 255, 0.2); position: relative; overflow: hidden; }
+        .rank-ssss { color: var(--sys-red); text-shadow: 0 0 20px var(--sys-red); font-size: 3rem; font-weight: 900; text-align: center; }
+        .progress-bar { width: 100%; height: 10px; background: #222; margin-top: 10px; position: relative; }
+        .progress-fill { height: 100%; background: var(--sys-blue); width: 0%; transition: 0.5s; }
+        
+        /* NAVIGATION */
+        .nav-bar { position: fixed; bottom: 0; width: 100%; background: #000; display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid var(--sys-blue); }
+        .nav-item { color: var(--sys-blue); font-size: 0.7rem; cursor: pointer; opacity: 0.6; }
+        .active-nav { opacity: 1; text-shadow: 0 0 10px var(--sys-blue); }
+
+        /* SCANNER ANIMATION */
+        .scanner-line { position: absolute; width: 100%; height: 2px; background: var(--sys-blue); top: 0; animation: scan 2s infinite; box-shadow: 0 0 15px var(--sys-blue); }
+        @keyframes scan { 0% {top: 0%} 100% {top: 100%} }
+    </style>
+</head>
+<body>
+
+    <div id="status-screen" class="screen">
+        <div class="glass-panel">
+            <p style="font-size: 0.7rem; color: var(--sys-blue);">[ HUNTER STATUS ]</p>
+            <h1 id="user-display">NAME: AWAKENING...</h1>
+            <div id="rank-badge" class="rank-ssss">RANK F</div>
+            <div class="progress-bar"><div id="xp-bar" class="progress-fill"></div></div>
+            <p style="font-size: 0.6rem; text-align: right;">XP TO RANK UP: <span id="xp-val">0</span>/100</p>
+        </div>
+
+        <div class="glass-panel">
+            <p style="color: var(--sys-gold);">[ DAILY QUEST: REAWAKENING ]</p>
+            <ul id="daily-list" style="list-style: none; padding: 0; font-size: 0.8rem;">
+                <li>- Pushups: <span id="push-count">0</span> / 20</li>
+                <li>- Situps: <span id="sit-count">0</span> / 20</li>
+                <li>- Drink 4L Water</li>
+            </ul>
+            <button onclick="doExercise('push')" style="background:transparent; border:1px solid var(--sys-blue); color:white; padding:10px; width:100%; margin-top:10px;">COMPLETE REP</button>
+        </div>
+    </div>
+
+    <div id="glow-screen" class="screen" style="display:none;">
+        <div class="glass-panel" style="height: 300px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+            <div class="scanner-line"></div>
+            <p>[ AI FACE ANALYSIS ]</p>
+            <input type="file" accept="image/*" capture="user" onchange="processGlow()">
+            <div id="glow-report" style="margin-top: 20px; font-size: 0.7rem;">Upload face scan to see your potential...</div>
+        </div>
+    </div>
+
+    <div class="nav-bar">
+        <div class="nav-item active-nav" onclick="showScreen('status-screen')">STATUS</div>
+        <div class="nav-item" onclick="showScreen('glow-screen')">GLOW UP</div>
+        <div class="nav-item" onclick="alert('World Ranking: Coming Soon!')">GLOBAL</div>
+    </div>
+
+    <script>
+        let xp = 0;
+        let pushups = 0;
+
+        function doExercise(type) {
+            if (pushups < 20) {
+                pushups++;
+                xp += 5;
+                document.getElementById('push-count').innerText = pushups;
+                document.getElementById('xp-bar').style.width = xp + "%";
+                document.getElementById('xp-val').innerText = xp;
+            }
+            if (xp >= 100) {
+                document.getElementById('rank-badge').innerText = "RANK E";
+                document.getElementById('rank-badge').style.color = "#00ff00";
+            }
+        }
+
+        function processGlow() {
+            document.getElementById('glow-report').innerHTML = `
+                <span style="color:var(--sys-blue)">[ ANALYSIS COMPLETE ]</span><br>
+                - Skin Quality: 65% (Acne Detected)<br>
+                - Remedy: High Zinc foods, 0 Sugar, 8h Sleep.<br>
+                - Facial Potential: RANK S (Chiseled Jawline Path)
+            `;
+        }
+
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+            document.getElementById(id).style.display = 'block';
+        }
+    </script>
+</body>
+</html>
