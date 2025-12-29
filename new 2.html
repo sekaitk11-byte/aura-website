@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIMITLESS | System Evolution</title>
+    <style>
+        :root {
+            --neon-blue: #00d4ff;
+            --dark-bg: #050608;
+            --rank-s: #ff0055;
+            --gold: #ffcc00;
+            --panel: rgba(10, 12, 18, 0.98);
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            background: var(--dark-bg);
+            color: #e0e0e0;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .system-container {
+            width: 100%;
+            max-width: 480px;
+            padding: 20px;
+            box-sizing: border-box;
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* High-Tech Card Design */
+        .card {
+            background: var(--panel);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-left: 4px solid var(--neon-blue);
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.1);
+        }
+
+        h2, h3 { 
+            color: var(--neon-blue); 
+            text-transform: uppercase; 
+            letter-spacing: 4px; 
+            margin-top: 0;
+            font-weight: 300;
+        }
+
+        /* Rank Display Animation */
+        .rank-display {
+            font-size: 7rem;
+            font-weight: 900;
+            text-align: center;
+            margin: 10px 0;
+            color: white;
+            text-shadow: 0 0 30px var(--neon-blue);
+            transition: var(--transition);
+        }
+
+        .rank-s-mode { color: var(--rank-s) !important; text-shadow: 0 0 40px var(--rank-s) !important; }
+
+        /* Progress Bar Smoothing */
+        .bar-container { background: rgba(255,255,255,0.05); height: 8px; border-radius: 4px; margin: 20px 0; overflow: hidden; }
+        .bar-fill { height: 100%; background: linear-gradient(90deg, var(--neon-blue), #0080ff); width: 0%; transition: width 1.5s cubic-bezier(0.1, 0, 0.1, 1); }
+
+        input, select {
+            width: 100%; padding: 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(0, 212, 255, 0.2);
+            color: white; margin-bottom: 20px; border-radius: 4px; outline: none; transition: var(--transition);
+        }
+
+        input:focus { border-color: var(--neon-blue); background: rgba(0, 212, 255, 0.05); }
+
+        .btn {
+            width: 100%; padding: 18px; background: transparent; border: 1px solid var(--neon-blue);
+            color: var(--neon-blue); font-weight: bold; cursor: pointer; text-transform: uppercase;
+            letter-spacing: 2px; transition: var(--transition); border-radius: 4px;
+        }
+
+        .btn:hover { background: var(--neon-blue); color: black; box-shadow: 0 0 30px rgba(0, 212, 255, 0.4); }
+
+        .hidden { display: none; opacity: 0; pointer-events: none; }
+        .visible { display: block; opacity: 1; pointer-events: all; animation: fadeIn 0.6s ease; }
+
+        .glow-up-report { font-size: 0.9rem; line-height: 1.6; color: #a0c0ff; margin-top: 15px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 4px; }
+        
+        #preview-img { width: 100%; margin-top: 15px; border-radius: 8px; filter: grayscale(0.5) contrast(1.2); }
+        
+        .quest-item { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); transition: 0.3s; }
+        .quest-item:hover { background: rgba(0, 212, 255, 0.05); padding-left: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="system-container">
+    <div id="screen-auth" class="card visible">
+        <h2>[ Awakening ]</h2>
+        <input type="text" id="username" placeholder="HUNTER NAME">
+        <select id="focus-area">
+            <option value="Glow">Focus: Aesthetics & Glow Up</option>
+            <option value="Strength">Focus: Strength & Power</option>
+        </select>
+        <button class="btn" onclick="awaken()">Initialize System</button>
+    </div>
+
+    <div id="screen-welcome" class="card hidden">
+        <h3 id="welcome-header" style="color: var(--neon-blue);"></h3>
+        <p style="font-size: 0.9rem; color: #888;">Your username is now synced to the Global Ranking System. The AI will track your face, your skin, and your muscle growth daily.</p>
+        <button class="btn" onclick="showDashboard()">Proceed Hunter</button>
+    </div>
+
+    <div id="screen-main" class="hidden">
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; font-size:0.75rem; letter-spacing:1px;">
+                <span>HUNTER: <b id="ui-name" style="color:var(--neon-blue)"></b></span>
+                <span>STATUS: <b id="ui-rank-name">F-RANK</b></span>
+            </div>
+            <div class="rank-display" id="ui-rank-letter">F</div>
+            <div class="bar-container"><div id="ui-bar" class="bar-fill"></div></div>
+            <p id="ui-streak" style="text-align:center; font-size:0.8rem; letter-spacing:1px; color:#666;">REQUIRED PROOF: 7 DAYS</p>
+            <button class="btn" style="border-color:var(--gold); color:var(--gold); font-size:0.7rem;" onclick="activateVoice()">[ AUTHENTICATE SYSTEM VOICE ]</button>
+        </div>
+
+        <div class="card">
+            <h3>[ Glow-Up Scanner ]</h3>
+            <input type="file" id="file-input" accept="image/*" style="display:none" onchange="submitEvidence(this)">
+            <button class="btn" onclick="document.getElementById('file-input').click()">Upload Face Scan</button>
+            <img id="preview-img" class="hidden">
+            <div id="ai-report" class="glow-up-report hidden"></div>
+        </div>
+
+        <div class="card">
+            <h3>[ Current Quests ]</h3>
+            <div id="quest-list"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let state = {
+        name: "", rankIdx: 0, streak: 0, voiceOn: false, lastDate: null,
+        ranks: ["F", "E", "D", "C", "B", "A", "S", "SS", "SSS", "SSSS"]
+    };
+
+    const synth = window.speechSynthesis;
+
+    // Better Female Voice Logic
+    function systemSpeak(text) {
+        if (!state.voiceOn) return;
+        synth.cancel();
+        const msg = new SpeechSynthesisUtterance(text);
+        const voices = synth.getVoices();
+        
+        // Search for high-quality female voices (Google, Microsoft, or Apple)
+        // Usually "Google UK English Female" or "Microsoft Zira"
+        const femaleVoice = voices.find(v => (v.name.includes("Female") || v.name.includes("Google") || v.name.includes("Zira") || v.name.includes("Samantha")) && v.lang.includes("en"));
+        
+        if (femaleVoice) msg.voice = femaleVoice;
+        msg.pitch = 1.1; // Slightly higher for a clear female tone
+        msg.rate = 1.0;
+        synth.speak(msg);
+    }
+
+    function activateVoice() {
+        state.voiceOn = true;
+        systemSpeak("System voice authenticated. Monitoring Hunter progress in real time.");
+    }
+
+    function awaken() {
+        state.name = document.getElementById('username').value || "Hunter";
+        transition('screen-auth', 'screen-welcome');
+        
+        document.getElementById('welcome-header').innerText = `[ Welcome Hunter ${state.name} ]`;
+        
+        state.voiceOn = true; // Temporary on for greeting
+        systemSpeak(`Welcome, Hunter ${state.name}. Your alias has been registered to the global database. Proceed to your daily quests.`);
+    }
+
+    function showDashboard() {
+        transition('screen-welcome', 'screen-main');
+        document.getElementById('ui-name').innerText = state.name.toUpperCase();
+        generateQuests();
+    }
+
+    function transition(from, to) {
+        const f = document.getElementById(from);
+        const t = document.getElementById(to);
+        f.style.opacity = '0';
+        setTimeout(() => {
+            f.classList.remove('visible');
+            f.classList.add('hidden');
+            t.classList.remove('hidden');
+            t.classList.add('visible');
+            t.style.opacity = '1';
+        }, 400);
+    }
+
+    function generateQuests() {
+        const mult = state.rankIdx + 1;
+        const quests = [
+            `Pushups: ${12 * mult} reps`,
+            `Air Squats: ${15 * mult} reps`,
+            `Dead Hang: ${20 * mult} seconds`,
+            `Distance: ${1.5 + mult} km`
+        ];
+        document.getElementById('quest-list').innerHTML = quests.map(q => `<div class="quest-item">🔘 ${q}</div>`).join('');
+    }
+
+    function submitEvidence(input) {
+        if (input.files && input.files[0]) {
+            const today = new Date().toDateString();
+            if (state.lastDate === today) {
+                systemSpeak("Warning. Daily quota reached. Multiple uploads are restricted.");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.getElementById('preview-img');
+                img.src = e.target.result;
+                img.classList.remove('hidden');
+                
+                systemSpeak("Initiating scan. Analyzing facial structure and inflammation markers.");
+
+                setTimeout(() => {
+                    state.streak++;
+                    state.lastDate = today;
+                    const report = `[System Report]: Acne inflammation detected. To clear your skin, increase hydration and eliminate processed sugars. Your potential for growth is 94%.`;
+                    const reportDiv = document.getElementById('ai-report');
+                    reportDiv.innerText = report;
+                    reportDiv.classList.remove('hidden');
+                    
+                    systemSpeak(`Scan complete. ${report} Streak updated to ${state.streak} days.`);
+                    updateUI();
+                    if (state.streak >= 7) evolve();
+                }, 2000);
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function evolve() {
+        state.rankIdx++;
+        state.streak = 0;
+        const rank = state.ranks[state.rankIdx];
+        systemSpeak(`[Evolution Alert]: Hunter ${state.name} has transcended. Rank up successful. You are now ${rank} Rank.`);
+        updateUI();
+        generateQuests();
+    }
+
+    function updateUI() {
+        const rank = state.ranks[state.rankIdx];
+        const letter = document.getElementById('ui-rank-letter');
+        letter.innerText = rank;
+        if (state.rankIdx >= 6) letter.classList.add('rank-s-mode');
+        
+        document.getElementById('ui-rank-name').innerText = rank + "-RANK";
+        document.getElementById('ui-streak').innerText = `REQUIRED PROOF: ${7 - state.streak} DAYS REMAINING`;
+        document.getElementById('ui-bar').style.width = (state.streak / 7 * 100) + "%";
+    }
+
+    window.speechSynthesis.onvoiceschanged = () => synth.getVoices();
+</script>
+
+</body>
+</html>
