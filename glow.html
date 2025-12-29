@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE SYSTEM</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
+        :root {
+            --sys-blue: #00e5ff;
+            --sys-purple: #7000ff;
+            --sys-bg: rgba(5, 10, 20, 0.9);
+            --sys-border: #00e5ff;
+        }
+
+        body {
+            background: #000;
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* HOLOGRAPHIC PANEL EFFECT */
+        .system-panel {
+            width: 90%;
+            max-width: 400px;
+            margin: 20px auto;
+            background: var(--sys-bg);
+            border: 1px solid var(--sys-border);
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.2), inset 0 0 10px rgba(0, 229, 255, 0.1);
+            padding: 20px;
+            position: relative;
+            backdrop-filter: blur(15px);
+        }
+
+        .header-bar {
+            border-bottom: 2px solid var(--sys-blue);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .rank-text {
+            font-size: 3rem;
+            font-weight: 900;
+            color: var(--sys-blue);
+            text-shadow: 0 0 10px var(--sys-blue);
+        }
+
+        /* STATS & POINTS */
+        .stat-line {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0, 229, 255, 0.1);
+        }
+
+        .add-btn {
+            background: var(--sys-blue);
+            border: none;
+            color: black;
+            font-weight: bold;
+            cursor: pointer;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+
+        /* LEADERBOARD */
+        .leaderboard-list {
+            list-style: none;
+            padding: 0;
+            font-size: 0.8rem;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            margin-bottom: 5px;
+            border-left: 3px solid var(--sys-blue);
+        }
+
+        .highlight { color: var(--sys-blue); font-weight: bold; }
+        
+        .nav-footer {
+            display: flex;
+            justify-content: space-around;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            position: fixed;
+            bottom: 0; width: 100%;
+            border-top: 1px solid var(--sys-blue);
+        }
+
+        .nav-item { color: var(--sys-blue); font-size: 0.7rem; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div id="status-tab" class="system-panel">
+        <div class="header-bar">
+            <div>
+                <p style="margin:0; font-size:0.7rem;">[ PLAYER: SUNG JIN-WOO ]</p>
+                <div class="rank-text" id="display-rank">E</div>
+            </div>
+            <div style="text-align: right;">
+                <p style="margin:0; font-size:0.7rem;">LEVEL</p>
+                <div style="font-size: 1.5rem;" id="display-lvl">1</div>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <p style="font-size:0.8rem; color: #aaa;">AVAILABLE POINTS: <span id="points" style="color:var(--sys-blue)">5</span></p>
+            <div class="stat-line"><span>STRENGTH</span> <div><span id="str">10</span> <button class="add-btn" onclick="addStat('str')">+</button></div></div>
+            <div class="stat-line"><span>AGILITY</span> <div><span id="agi">10</span> <button class="add-btn" onclick="addStat('agi')">+</button></div></div>
+            <div class="stat-line"><span>SENSE</span> <div><span id="sen">10</span> <button class="add-btn" onclick="addStat('sen')">+</button></div></div>
+        </div>
+
+        <div class="quest-card" style="border: 1px solid var(--sys-purple); padding:10px; background: rgba(112, 0, 255, 0.1);">
+            <p style="margin:0; font-size:0.6rem; color:var(--sys-purple);">[ ACTIVE QUEST ]</p>
+            <p id="quest-desc">Loading Daily Quest...</p>
+            <button onclick="completeQuest()" style="width:100%; background:var(--sys-purple); border:none; color:white; padding:5px; margin-top:5px; cursor:pointer;">COMPLETE QUEST</button>
+        </div>
+    </div>
+
+    <div id="leaderboard-tab" class="system-panel" style="display:none;">
+        <h3>WORLDWIDE RANKINGS</h3>
+        <div class="leaderboard-list">
+            <div class="leaderboard-item"><span>1. Thomas Andre</span> <span class="highlight">RANK S</span></div>
+            <div class="leaderboard-item"><span>2. Christopher Reed</span> <span class="highlight">RANK S</span></div>
+            <div class="leaderboard-item"><span>3. Liu Zhigang</span> <span class="highlight">RANK S</span></div>
+            <div class="leaderboard-item" style="background: rgba(0, 229, 255, 0.2);"><span>9,999+ YOU</span> <span class="highlight">RANK E</span></div>
+        </div>
+    </div>
+
+    <div class="nav-footer">
+        <div class="nav-item" onclick="switchTab('status')">STATUS</div>
+        <div class="nav-item" onclick="switchTab('leaderboard')">LEADERBOARD</div>
+    </div>
+
+    <script>
+        let player = { lvl: 1, points: 5, str: 10, agi: 10, sen: 10, rank: 'E' };
+
+        function addStat(stat) {
+            if (player.points > 0) {
+                player[stat]++;
+                player.points--;
+                document.getElementById(stat).innerText = player[stat];
+                document.getElementById('points').innerText = player.points;
+            }
+        }
+
+        function completeQuest() {
+            player.lvl++;
+            player.points += 3;
+            if(player.lvl > 5) player.rank = 'D';
+            if(player.lvl > 15) player.rank = 'S';
+            
+            document.getElementById('display-lvl').innerText = player.lvl;
+            document.getElementById('display-rank').innerText = player.rank;
+            document.getElementById('points').innerText = player.points;
+            alert("[SYSTEM: YOU HAVE LEVELED UP]");
+        }
+
+        function switchTab(tab) {
+            document.getElementById('status-tab').style.display = tab === 'status' ? 'block' : 'none';
+            document.getElementById('leaderboard-tab').style.display = tab === 'leaderboard' ? 'block' : 'none';
+        }
+    </script>
+</body>
+</html>
