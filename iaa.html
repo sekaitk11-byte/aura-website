@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIMITLESS | The System Awakening</title>
+    <style>
+        :root {
+            --neon-blue: #00d4ff;
+            --dark-bg: #050608;
+            --rank-s: #ff0055;
+            --panel: rgba(15, 18, 25, 0.95);
+        }
+
+        body {
+            background: var(--dark-bg);
+            color: #e0e0e0;
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .system-container {
+            width: 100%;
+            max-width: 480px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* Solo Leveling Blue Window Style */
+        .card {
+            background: var(--panel);
+            border: 2px solid var(--neon-blue);
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: inset 0 0 15px rgba(0, 212, 255, 0.2), 0 0 20px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+
+        .system-msg {
+            color: var(--neon-blue);
+            font-size: 0.9rem;
+            border-left: 3px solid var(--neon-blue);
+            padding-left: 10px;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 { 
+            color: var(--neon-blue); 
+            text-transform: uppercase; 
+            letter-spacing: 3px; 
+            margin-top: 0;
+            text-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        .rank-display {
+            font-size: 6rem;
+            font-weight: 900;
+            text-align: center;
+            margin: 15px 0;
+            color: white;
+            text-shadow: 0 0 25px var(--neon-blue);
+        }
+
+        .rank-ssss { color: var(--rank-s) !important; text-shadow: 0 0 40px var(--rank-s) !important; }
+
+        .bar-container { background: #000; height: 12px; border: 1px solid #333; margin: 15px 0; }
+        .bar-fill { height: 100%; background: var(--neon-blue); width: 0%; transition: 1s ease-in-out; }
+
+        input, select {
+            width: 100%; padding: 12px; background: black; border: 1px solid var(--neon-blue);
+            color: white; margin-bottom: 15px; box-sizing: border-box;
+        }
+
+        .btn {
+            width: 100%; padding: 15px; background: rgba(0, 212, 255, 0.1); border: 1px solid var(--neon-blue);
+            color: var(--neon-blue); font-weight: bold; cursor: pointer; text-transform: uppercase;
+        }
+
+        .btn:hover { background: var(--neon-blue); color: black; box-shadow: 0 0 20px var(--neon-blue); }
+        .hidden { display: none; }
+        .glow-up-report { font-size: 0.85rem; line-height: 1.6; color: #88ccff; border-left: 2px solid var(--neon-blue); padding-left: 15px; margin-top: 15px; }
+        #preview-img { width: 100%; margin-top: 15px; border: 1px solid #333; }
+    </style>
+</head>
+<body>
+
+<div class="system-container">
+    <div id="screen-auth" class="card">
+        <h2>[ Awakening ]</h2>
+        <p style="font-size: 0.8rem; color: #666;">Identify yourself to the System.</p>
+        <input type="text" id="username" placeholder="HUNTER NAME">
+        <input type="number" id="height" placeholder="HEIGHT (CM)">
+        <select id="focus-area">
+            <option value="Abs">Focus: Core & Abs</option>
+            <option value="Upper">Focus: Upper Body</option>
+            <option value="Legs">Focus: Lower Body</option>
+            <option value="Glow">Focus: Glow Up (Aesthetics)</option>
+        </select>
+        <button class="btn" onclick="awaken()">Initialize System</button>
+    </div>
+
+    <div id="screen-welcome" class="card hidden">
+        <div id="welcome-text" class="system-msg"></div>
+        <div id="explanation" style="font-size: 0.8rem; line-height: 1.6;">
+            <p><strong>Username Use:</strong> Your alias is your unique ID in the global database. It tracks your rank across all "Guild Wars" and ensures the AI recognizes your biometric progress during photo verification.</p>
+        </div>
+        <button class="btn" onclick="goToDashboard()">PROCEED TO QUESTS</button>
+    </div>
+
+    <div id="screen-main" class="hidden">
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; font-size:0.7rem; color: var(--neon-blue);">
+                <span>NAME: <b id="ui-name">---</b></span>
+                <span>STATUS: <b id="ui-rank-name">F-RANK</b></span>
+            </div>
+            <div class="rank-display" id="ui-rank-letter">F</div>
+            <div class="bar-container"><div id="ui-bar" class="bar-fill"></div></div>
+            <p id="ui-streak" style="text-align:center; font-size:0.8rem;">REMAINING EVIDENCE: 7 DAYS</p>
+            <button class="btn" style="border-color: #ffcc00; color: #ffcc00;" onclick="activateVoice()">[ AUTHENTICATE VOICE ]</button>
+        </div>
+
+        <div class="card">
+            <h3>[ AI Glow-Up Scan ]</h3>
+            <p style="font-size: 0.75rem;">Upload facial/body photo for potential analysis.</p>
+            <input type="file" id="file-input" accept="image/*" onchange="submitEvidence(this)">
+            <img id="preview-img" class="hidden">
+            <div id="ai-report" class="glow-up-report hidden"></div>
+        </div>
+
+        <div class="card">
+            <h3>[ Daily Quest ]</h3>
+            <div id="quest-list" style="font-size: 0.9rem;"></div>
+            <p id="step-tracker" style="color: var(--neon-blue); font-size: 0.7rem; margin-top: 15px;">STEP TRACER: ACTIVE [1,420 / 10,000]</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    const synth = window.speechSynthesis;
+    let state = {
+        name: "", rankIdx: 0, streak: 0, voiceOn: false, lastDate: null,
+        ranks: ["F", "E", "D", "C", "B", "A", "S", "SS", "SSS", "SSSS"]
+    };
+
+    function systemSpeak(text) {
+        if (!state.voiceOn) return;
+        synth.cancel();
+        const msg = new SpeechSynthesisUtterance(text);
+        msg.pitch = 0.5; // Cold, deep AI tone
+        msg.rate = 0.9;
+        const voices = synth.getVoices();
+        // Prefer a deep English voice
+        msg.voice = voices.find(v => v.lang.includes('en-GB')) || voices[0];
+        synth.speak(msg);
+    }
+
+    function activateVoice() {
+        state.voiceOn = true;
+        systemSpeak("System Voice Authenticated. Welcome Hunter. I am the administrator of your growth.");
+    }
+
+    function awaken() {
+        state.name = document.getElementById('username').value || "PLAYER";
+        
+        // Switch to Welcome Screen
+        document.getElementById('screen-auth').classList.add('hidden');
+        document.getElementById('screen-welcome').classList.remove('hidden');
+
+        const welcomeStr = `Welcome, Hunter ${state.name}.`;
+        document.getElementById('welcome-text').innerText = `[NOTIFICATION]: ${welcomeStr}`;
+        
+        // Voice Protocol - We turn on voice internally for the greeting
+        state.voiceOn = true; 
+        systemSpeak(`${welcomeStr}. You have been registered. Your username will track your evolution from F-Rank to Legendary status. Proceed.`);
+    }
+
+    function goToDashboard() {
+        document.getElementById('screen-welcome').classList.add('hidden');
+        document.getElementById('screen-main').classList.remove('hidden');
+        
+        document.getElementById('ui-name').innerText = state.name.toUpperCase();
+        generateQuests();
+    }
+
+    function generateQuests() {
+        const mult = state.rankIdx + 1;
+        const quests = [
+            `Pushups: ${10 * mult} reps`,
+            `Squats: ${20 * mult} reps`,
+            `Plank: ${30 * mult} seconds`,
+            `Running: ${2 + mult} kilometers`
+        ];
+        document.getElementById('quest-list').innerHTML = quests.map(q => `<div style="margin-bottom:8px;">🔘 ${q}</div>`).join('');
+    }
+
+    function submitEvidence(input) {
+        if (input.files && input.files[0]) {
+            const today = new Date().toDateString();
+            if (state.lastDate === today) {
+                systemSpeak("Warning. Daily evidence already recorded. Multiple uploads are prohibited.");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('preview-img').src = e.target.result;
+                document.getElementById('preview-img').classList.remove('hidden');
+                
+                systemSpeak("Analyzing physical markers... scanning for acne and muscle density...");
+
+                setTimeout(() => {
+                    state.streak++;
+                    state.lastDate = today;
+                    
+                    const report = `[ANALYSIS]: Skin inflammation detected. Suggesting high protein diet and zero dairy. Glow-up potential: 92%. Streak: ${state.streak} days.`;
+                    const uiReport = document.getElementById('ai-report');
+                    uiReport.innerText = report;
+                    uiReport.classList.remove('hidden');
+                    
+                    systemSpeak(`Proof accepted. ${report}`);
+                    updateUI();
+
+                    if (state.streak >= 7) evolve();
+                }, 2000);
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function evolve() {
+        state.rankIdx++;
+        state.streak = 0;
+        const rank = state.ranks[state.rankIdx];
+        systemSpeak(`[ALERT]: Conditions met. Rank up successful. You are now ${rank} Rank. Evolution confirmed.`);
+        updateUI();
+        generateQuests();
+    }
+
+    function updateUI() {
+        const rank = state.ranks[state.rankIdx];
+        const letter = document.getElementById('ui-rank-letter');
+        letter.innerText = rank;
+        
+        if (rank.includes('S')) {
+            letter.className = "rank-display rank-ssss";
+        }
+        
+        document.getElementById('ui-rank-name').innerText = rank + "-RANK";
+        document.getElementById('ui-streak').innerText = `REMAINING EVIDENCE: ${7 - state.streak} DAYS`;
+        document.getElementById('ui-bar').style.width = (state.streak / 7 * 100) + "%";
+    }
+
+    window.speechSynthesis.onvoiceschanged = () => synth.getVoices();
+</script>
+
+</body>
+</html>
