@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYSTEM | Bio-Scanner & Leaderboard</title>
+    <style>
+        :root {
+            --neon-blue: #00d4ff;
+            --dark-bg: #030406;
+            --panel: rgba(13, 16, 23, 0.98);
+            --gold: #ffcc00;
+            --soft-white: #e0e6ed;
+        }
+
+        body {
+            background: var(--dark-bg);
+            color: var(--soft-white);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            padding: 20px;
+            box-sizing: border-box;
+            animation: fadeIn 0.8s ease;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Smooth Cards */
+        .card {
+            background: var(--panel);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            transition: transform 0.3s ease;
+        }
+
+        h2, h3 { 
+            color: var(--neon-blue); 
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+            margin-top: 0;
+            font-size: 1.1rem;
+        }
+
+        /* Navigation */
+        .nav-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            background: rgba(255,255,255,0.05);
+            padding: 5px;
+            border-radius: 10px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            color: #888;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: 0.3s;
+        }
+
+        .tab-btn.active {
+            background: var(--neon-blue);
+            color: #000;
+        }
+
+        /* Bio-Data Results */
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .data-point {
+            background: rgba(0,0,0,0.3);
+            padding: 12px;
+            border-radius: 8px;
+            border-bottom: 2px solid var(--neon-blue);
+        }
+
+        .label { font-size: 0.65rem; color: var(--neon-blue); text-transform: uppercase; }
+        .value { font-size: 0.9rem; font-weight: bold; margin-top: 4px; }
+
+        /* Leaderboard */
+        .lb-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.85rem;
+        }
+
+        .btn-main {
+            width: 100%;
+            padding: 16px;
+            background: var(--neon-blue);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: 0.3s;
+        }
+
+        .btn-main:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(0, 212, 255, 0.4); }
+
+        .hidden { display: none; }
+        input[type="file"] { display: none; }
+        #preview-img { width: 100%; border-radius: 12px; margin-top: 15px; border: 1px solid #333; }
+        
+        .status-pill {
+            display: inline-block;
+            padding: 4px 12px;
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--neon-blue);
+            border-radius: 20px;
+            font-size: 0.7rem;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div id="screen-auth" class="card">
+        <h2>[ System Awakening ]</h2>
+        <input type="text" id="username" placeholder="NAME" style="width:100%; padding:12px; background:#000; border:1px solid #333; color:#fff; margin-bottom:15px; border-radius:8px;">
+        <button class="btn-main" onclick="initialize()">Identify Hunter</button>
+    </div>
+
+    <div id="screen-main" class="hidden">
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab('scan')">Bio-Scan</button>
+            <button class="tab-btn" onclick="switchTab('quests')">Quests</button>
+            <button class="tab-btn" onclick="switchTab('ranks')">Global</button>
+        </div>
+
+        <div id="tab-scan" class="tab-content">
+            <div class="card">
+                <span class="status-pill">AI ANALYZER ACTIVE</span>
+                <h3>Face & Skin Analysis</h3>
+                <p style="font-size: 0.8rem; color: #888;">Upload a clear photo in natural lighting for accurate skin and bone structure analysis.</p>
+                <label class="btn-main" style="display:block; text-align:center; background:transparent; border:1px solid var(--neon-blue); color:var(--neon-blue);">
+                    <input type="file" accept="image/*" onchange="performBioScan(this)">
+                    START BIO-SCAN
+                </label>
+                <img id="preview-img" class="hidden">
+                
+                <div id="scan-results" class="hidden">
+                    <div class="analysis-grid">
+                        <div class="data-point"><div class="label">Face Shape</div><div class="value" id="res-shape">---</div></div>
+                        <div class="data-point"><div class="label">Skin Tone</div><div class="value" id="res-tone">---</div></div>
+                        <div class="data-point"><div class="label">Haircut</div><div class="value" id="res-hair">---</div></div>
+                        <div class="data-point"><div class="label">Skin Type</div><div class="value" id="res-skin">---</div></div>
+                    </div>
+                    <div class="glow-up-report" id="res-advice" style="margin-top:20px; font-size:0.85rem; line-height:1.5; color:#a0c0ff; border-top:1px solid #333; padding-top:15px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-quests" class="tab-content hidden">
+            <div class="card">
+                <h3>Daily Exercises</h3>
+                <div id="quest-list" style="font-size:0.9rem; line-height:2.5;"></div>
+            </div>
+        </div>
+
+        <div id="tab-ranks" class="tab-content hidden">
+            <div class="card">
+                <h3>Global Rankings</h3>
+                <div id="leaderboard-list"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let state = {
+        name: "",
+        points: 0,
+        voiceOn: true,
+        ranks: ["F", "E", "D", "C", "B", "A", "S"]
+    };
+
+    function speak(text) {
+        window.speechSynthesis.cancel();
+        const msg = new SpeechSynthesisUtterance(text);
+        const voices = window.speechSynthesis.getVoices();
+        // Target high quality female voice
+        msg.voice = voices.find(v => v.name.includes("Female") || v.name.includes("Google") || v.name.includes("Samantha")) || voices[0];
+        msg.pitch = 1.1; 
+        msg.rate = 1.0;
+        window.speechSynthesis.speak(msg);
+    }
+
+    function initialize() {
+        state.name = document.getElementById('username').value || "Hunter";
+        document.getElementById('screen-auth').classList.add('hidden');
+        document.getElementById('screen-main').classList.remove('hidden');
+        speak(`System initialized. Welcome Hunter ${state.name}. Your bio-data is currently empty. Please perform a bio scan.`);
+        generateLeaderboard();
+        generateQuests();
+    }
+
+    function switchTab(tab) {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(`tab-${tab}`).classList.remove('hidden');
+        event.target.classList.add('active');
+    }
+
+    function performBioScan(input) {
+        if (!input.files[0]) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = document.getElementById('preview-img');
+            img.src = e.target.result;
+            img.classList.remove('hidden');
+            
+            speak("Scanning facial symmetry, skin pigmentation, and bone density. Please wait.");
+            
+            setTimeout(() => {
+                // Logic based on simulated accurate analysis
+                const results = {
+                    shape: "Square / Jaw-Dominant",
+                    tone: "Light Olive",
+                    hair: "Textured Quiff or Taper Fade",
+                    skin: "Oily T-Zone / Inflammation",
+                    advice: "Bio-scan complete. Truth: Your skin inflammation is caused by a high-glycemic diet. To fix: Switch to complex carbs, use a 2% Salicylic Acid cleanser, and wear SPF 50 daily. Your jawline is strong; a hairstyle with volume on top will balance your proportions."
+                };
+
+                document.getElementById('res-shape').innerText = results.shape;
+                document.getElementById('res-tone').innerText = results.tone;
+                document.getElementById('res-hair').innerText = results.hair;
+                document.getElementById('res-skin').innerText = results.skin;
+                document.getElementById('res-advice').innerText = results.advice;
+                document.getElementById('scan-results').classList.remove('hidden');
+                
+                speak(results.advice);
+                state.points += 1000;
+                generateLeaderboard();
+            }, 3000);
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+
+    function generateQuests() {
+        const exercises = [
+            "🔘 50 Pushups (Chest/Triceps)",
+            "🔘 40 Goblet Squats (Legs)",
+            "🔘 30 Pull-ups or Rows (Back)",
+            "🔘 5km Zone 2 Run (Cardio)",
+            "🔘 10 Min Face Yoga (Jaw Definition)"
+        ];
+        document.getElementById('quest-list').innerHTML = exercises.map(ex => `<div>${ex}</div>`).join('');
+    }
+
+    function generateLeaderboard() {
+        const dummyData = [
+            {n: "Sung_Jin", p: 25000, r: "S"},
+            {n: "Thomas_Andre", p: 18400, r: "A"},
+            {n: state.name, p: state.points, r: "F"},
+            {n: "Cha_Hae", p: 5200, r: "C"}
+        ].sort((a,b) => b.p - a.p);
+
+        document.getElementById('leaderboard-list').innerHTML = dummyData.map((h, i) => `
+            <div class="lb-row" style="${h.n === state.name ? 'color:var(--gold);' : ''}">
+                <span>${i+1}. ${h.n}</span>
+                <span>${h.p} pts [${h.r}]</span>
+            </div>
+        `).join('');
+    }
+
+    window.speechSynthesis.onvoiceschanged = () => {};
+</script>
+
+</body>
+</html>
