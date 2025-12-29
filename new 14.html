@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYSTEM | Absolute Monarch</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Outfit:wght@300;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --cyan: #00f2ff;
+            --magenta: #ff00ea;
+            --dark: #02040a;
+            --window-bg: rgba(7, 12, 24, 0.85);
+            --border: rgba(0, 242, 255, 0.2);
+            --ease: cubic-bezier(0.2, 1, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; outline: none; -webkit-font-smoothing: antialiased; }
+
+        body {
+            background-color: var(--dark);
+            background-image: 
+                radial-gradient(circle at 50% 50%, #001122 0%, #02040a 100%),
+                repeating-linear-gradient(0deg, rgba(0, 242, 255, 0.03) 0px, rgba(0, 242, 255, 0.03) 1px, transparent 1px, transparent 40px),
+                repeating-linear-gradient(90deg, rgba(0, 242, 255, 0.03) 0px, rgba(0, 242, 255, 0.03) 1px, transparent 1px, transparent 40px);
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Smoothing Wrappers */
+        .system-root {
+            width: 95%;
+            max-width: 900px;
+            will-change: transform, opacity;
+            transition: var(--ease) 1s;
+        }
+
+        .sys-card {
+            background: var(--window-bg);
+            backdrop-filter: blur(25px) saturate(180%);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 30px;
+            box-shadow: 0 0 80px rgba(0,0,0,0.8), inset 0 0 30px rgba(0, 242, 255, 0.05);
+            position: relative;
+        }
+
+        .sys-card::before {
+            content: "MONARCH SYSTEM V4.0";
+            position: absolute;
+            top: -10px; left: 20px;
+            background: var(--cyan);
+            color: #000;
+            font-family: 'Orbitron';
+            font-size: 0.6rem;
+            padding: 2px 10px;
+            font-weight: 900;
+        }
+
+        /* Header Animation */
+        .title-glow {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--cyan);
+            letter-spacing: 5px;
+            font-size: 2.2rem;
+            margin-bottom: 30px;
+            text-shadow: 0 0 20px var(--cyan);
+            animation: pulse 4s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; filter: drop-shadow(0 0 10px var(--cyan)); }
+            50% { opacity: 0.8; filter: drop-shadow(0 0 25px var(--cyan)); }
+        }
+
+        /* Grid Layout */
+        .layout {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+            gap: 40px;
+        }
+
+        /* Scanner Module */
+        .scan-viewport {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #000;
+            border: 1px solid var(--cyan);
+            position: relative;
+            overflow: hidden;
+            border-radius: 2px;
+        }
+
+        .laser {
+            position: absolute;
+            width: 100%; height: 2px;
+            background: var(--cyan);
+            box-shadow: 0 0 20px var(--cyan);
+            top: -10px;
+            z-index: 10;
+            display: none;
+        }
+
+        @keyframes scanning {
+            0% { top: 0%; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+
+        /* Input Styling */
+        .sys-input {
+            width: 100%;
+            padding: 20px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border);
+            color: #fff;
+            font-family: 'Orbitron';
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            transition: 0.3s;
+        }
+
+        .sys-input:focus { border-color: var(--cyan); background: rgba(0,242,255,0.05); }
+
+        /* Action Buttons */
+        .btn-mana {
+            width: 100%;
+            padding: 20px;
+            background: transparent;
+            border: 1px solid var(--cyan);
+            color: var(--cyan);
+            font-family: 'Orbitron';
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.4s var(--ease);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .btn-mana:hover {
+            background: var(--cyan);
+            color: #000;
+            box-shadow: 0 0 40px var(--cyan);
+            transform: translateY(-2px);
+        }
+
+        /* Data Cells */
+        .cell-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .cell {
+            background: rgba(255,255,255,0.03);
+            border-left: 2px solid var(--cyan);
+            padding: 12px;
+        }
+
+        .label { font-size: 0.6rem; color: var(--cyan); text-transform: uppercase; font-weight: 900; }
+        .val { font-size: 0.85rem; margin-top: 5px; font-weight: 600; }
+
+        .truth-box {
+            margin-top: 25px;
+            padding: 20px;
+            background: rgba(255, 0, 234, 0.05);
+            border: 1px solid var(--magenta);
+            border-left: 5px solid var(--magenta);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            animation: slideUp 0.6s var(--ease);
+        }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .hidden { display: none; }
+        #preview { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Rank Badge */
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border: 1px solid var(--magenta);
+            color: var(--magenta);
+            font-size: 0.7rem;
+            font-weight: 900;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="system-root">
+    <div id="screen-auth" class="sys-card">
+        <h1 class="title-glow">AWAKENING</h1>
+        <p style="opacity: 0.6; margin-bottom: 30px;">Identify yourself to the System to begin the evolution process.</p>
+        <input type="text" id="username" class="sys-input" placeholder="ENTER HUNTER NAME">
+        <button class="btn-mana" onclick="beginEvolution()">Initialize Link</button>
+    </div>
+
+    <div id="screen-main" class="sys-card hidden">
+        <div class="layout">
+            <div>
+                <div class="badge" id="ui-rank">F-RANK HUNTER</div>
+                <div id="ui-name" style="font-size: 1.8rem; font-family: 'Orbitron'; margin-bottom: 20px;">---</div>
+
+                <div class="scan-viewport">
+                    <div id="laser" class="laser"></div>
+                    <img id="preview" class="hidden">
+                    <div id="awaiting" style="height:100%; display:flex; align-items:center; justify-content:center; color:rgba(0,242,255,0.2); font-size:0.7rem; letter-spacing:2px; text-align:center;">
+                        AWAITING VISUAL BIOMETRICS
+                    </div>
+                </div>
+
+                <div class="cell-grid">
+                    <div class="cell"><div class="label">Face Shape</div><div class="val" id="res-shape">---</div></div>
+                    <div class="cell"><div class="label">Skin Tone</div><div class="val" id="res-tone">---</div></div>
+                    <div class="cell"><div class="label">Optimal Cut</div><div class="val" id="res-hair">---</div></div>
+                    <div class="cell"><div class="label">Evolution Level</div><div class="val" id="res-lvl">LVL 1</div></div>
+                </div>
+
+                <div id="truth-container" class="hidden">
+                    <div class="truth-box">
+                        <span style="color:var(--magenta); font-weight:900; letter-spacing:1px; display:block; margin-bottom:8px;">THE BIOLOGICAL TRUTH</span>
+                        <div id="truth-report"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:20px;">
+                <div style="padding:20px; border:1px solid var(--border); background:rgba(255,255,255,0.02);">
+                    <h3 style="font-family:'Orbitron'; font-size:0.8rem; color:var(--cyan); margin:0 0 15px 0;">DAILY QUESTS</h3>
+                    <div id="quest-list" style="font-size:0.85rem; color:#888; line-height:2.2;">
+                        <div>🔘 100 Pushups</div>
+                        <div>🔘 100 Situps</div>
+                        <div>🔘 100 Squats</div>
+                        <div>🔘 10km Run</div>
+                    </div>
+                </div>
+
+                <input type="file" id="camera" class="hidden" accept="image/*" onchange="runScan(this)">
+                <button class="btn-mana" onclick="document.getElementById('camera').click()">Initiate Scan</button>
+                
+                <div style="padding:20px; border:1px solid var(--border); flex-grow:1;">
+                    <h3 style="font-family:'Orbitron'; font-size:0.8rem; color:var(--magenta); margin:0 0 15px 0;">SYSTEM RANKINGS</h3>
+                    <div id="leaderboard" style="font-size:0.75rem; color:rgba(255,255,255,0.5);">
+                        <div style="display:flex; justify-content:space-between; padding:5px 0;"><span>1. SUNG_JIN_WOO</span><span>S-RANK</span></div>
+                        <div style="display:flex; justify-content:space-between; padding:5px 0; color:var(--cyan);"><span>2. YOU</span><span id="ui-rank-val">F-RANK</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let hunter = { name: "", rank: "F", points: 0, level: 1 };
+
+    function speak(text) {
+        window.speechSynthesis.cancel();
+        const msg = new SpeechSynthesisUtterance(text);
+        const voices = window.speechSynthesis.getVoices();
+        msg.voice = voices.find(v => v.name.includes("Female") || v.name.includes("Google") || v.name.includes("Samantha")) || voices[0];
+        msg.pitch = 0.9;
+        msg.rate = 1.0;
+        window.speechSynthesis.speak(msg);
+    }
+
+    function beginEvolution() {
+        const input = document.getElementById('username').value;
+        if(!input) return;
+        hunter.name = input.toUpperCase();
+        
+        document.getElementById('screen-auth').style.opacity = '0';
+        document.getElementById('screen-auth').style.transform = 'translateY(-20px) scale(0.95)';
+        
+        setTimeout(() => {
+            document.getElementById('screen-auth').classList.add('hidden');
+            const main = document.getElementById('screen-main');
+            main.classList.remove('hidden');
+            document.getElementById('ui-name').innerText = hunter.name;
+            speak(`Welcome, Hunter ${hunter.name}. Connection established. You are currently ranked F. Complete your daily scan to begin level progression.`);
+        }, 600);
+    }
+
+    function runScan(input) {
+        if (!input.files[0]) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.getElementById('preview');
+            const laser = document.getElementById('laser');
+            const awaiting = document.getElementById('awaiting');
+            
+            preview.src = e.target.result;
+            preview.classList.remove('hidden');
+            awaiting.classList.add('hidden');
+            laser.style.display = 'block';
+            laser.style.animation = 'scanning 2.5s infinite';
+
+            speak("Analyzing shadow aura and epidermal markers. Accessing truth-database.");
+
+            setTimeout(() => {
+                laser.style.display = 'none';
+                hunter.level += 1;
+                hunter.rank = "E";
+                
+                const report = "BIO-REPORT: Skin tone is Light-Warm. Skin condition: Excessive sebaceous activity in the nasal area. Truth: Your acne is caused by a high-sodium diet and dehydration. To fix: Increase water to 4L daily and use a clay mask twice weekly. Your face shape is Diamond. A haircut with volume on the sides and a textured top will minimize your forehead width and accentuate your jawline.";
+                
+                document.getElementById('res-shape').innerText = "Diamond";
+                document.getElementById('res-tone').innerText = "Light-Warm";
+                document.getElementById('res-hair').innerText = "Textured Volume";
+                document.getElementById('res-lvl').innerText = "LVL " + hunter.level;
+                document.getElementById('truth-report').innerText = report;
+                document.getElementById('truth-container').classList.remove('hidden');
+                document.getElementById('ui-rank').innerText = "E-RANK HUNTER";
+                document.getElementById('ui-rank-val').innerText = "E-RANK";
+                
+                speak(report + ". Level Up. Rank Up.");
+            }, 3500);
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+
+    window.speechSynthesis.onvoiceschanged = () => {};
+</script>
+
+</body>
+</html>
