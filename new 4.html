@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIMITLESS GLOBAL | The System</title>
+    <style>
+        :root {
+            --neon-blue: #00d4ff;
+            --dark-bg: #050608;
+            --rank-s: #ff0055;
+            --gold: #ffcc00;
+            --panel: rgba(10, 12, 18, 0.98);
+        }
+
+        body {
+            background: var(--dark-bg);
+            color: #e0e0e0;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* ONLINE STATUS INDICATOR */
+        .online-status {
+            display: flex;
+            align-items: center;
+            font-size: 0.7rem;
+            color: #4ef037;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+        .dot { height: 8px; width: 8px; background-color: #4ef037; border-radius: 50%; display: inline-block; margin-right: 5px; box-shadow: 0 0 10px #4ef037; }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-left: 4px solid var(--neon-blue);
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* GLOBAL RANKING TABLE */
+        .leaderboard { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .leaderboard th { text-align: left; font-size: 0.7rem; color: var(--neon-blue); padding-bottom: 10px; }
+        .leaderboard td { padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.85rem; }
+        
+        .rank-ssss-tag { color: var(--rank-s); font-weight: bold; text-shadow: 0 0 10px var(--rank-s); }
+        .user-row { background: rgba(255, 204, 0, 0.05); color: var(--gold); }
+
+        /* LIVE FEED */
+        .live-feed {
+            height: 50px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            font-size: 0.75rem;
+            color: var(--neon-blue);
+            border: 1px solid rgba(0, 212, 255, 0.1);
+        }
+
+        .btn {
+            width: 100%; padding: 15px; background: transparent; border: 1px solid var(--neon-blue);
+            color: var(--neon-blue); font-weight: bold; cursor: pointer; text-transform: uppercase;
+            transition: 0.3s;
+        }
+        .btn:hover { background: var(--neon-blue); color: black; box-shadow: 0 0 20px var(--neon-blue); }
+
+        .hidden { display: none; }
+        input { width: 100%; padding: 12px; background: #000; border: 1px solid #333; color: white; margin-bottom: 10px; box-sizing: border-box; }
+        
+        .tab-nav { display: flex; gap: 5px; margin-bottom: 20px; }
+        .tab-nav button { flex: 1; padding: 10px; background: #111; border: 1px solid #333; color: #555; cursor: pointer; font-size: 0.7rem; }
+        .tab-nav button.active { border-color: var(--neon-blue); color: var(--neon-blue); }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="online-status"><span class="dot"></span> Global Server: Connected</div>
+
+    <div id="screen-auth" class="card">
+        <h3>[ Create Global Profile ]</h3>
+        <input type="text" id="username" placeholder="HUNTER USERNAME">
+        <input type="text" id="region" placeholder="REGION (e.g. EUROPE, ASIA)">
+        <button class="btn" onclick="initializeGlobal()">Awaken</button>
+    </div>
+
+    <div id="screen-main" class="hidden">
+        <div class="live-feed" id="live-feed">
+            [SYSTEM]: Scanning for active hunters worldwide...
+        </div>
+
+        <div class="tab-nav">
+            <button id="tab-dash" class="active" onclick="switchTab('dash')">DASHBOARD</button>
+            <button id="tab-world" onclick="switchTab('world')">WORLD RANKING</button>
+        </div>
+
+        <div id="view-dash">
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; font-size:0.7rem;">
+                    <span id="display-user">PLAYER</span>
+                    <span id="display-rank" style="color:var(--neon-blue)">F-RANK</span>
+                </div>
+                <h1 id="display-rank-letter" style="text-align:center; font-size:5rem; margin:10px 0;">F</h1>
+                <p id="ui-streak" style="text-align:center; font-size:0.8rem;">Day 0 of 7 towards Rank Evolution</p>
+                <button class="btn" onclick="activateVoice()" style="color:var(--gold); border-color:var(--gold);">Enable System Voice</button>
+            </div>
+
+            <div class="card">
+                <h3>[ AI GLOW-UP SCANNER ]</h3>
+                <input type="file" accept="image/*" onchange="processGlobalProof(this)">
+                <div id="ai-msg" style="font-size:0.8rem; margin-top:10px; color:#88ccff;"></div>
+            </div>
+        </div>
+
+        <div id="view-world" class="hidden">
+            <div class="card">
+                <h3>[ Worldwide Leaderboard ]</h3>
+                <table class="leaderboard">
+                    <thead>
+                        <tr><th>#</th><th>HUNTER</th><th>REGION</th><th>LEVEL</th></tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const synth = window.speechSynthesis;
+    let state = {
+        user: "",
+        region: "",
+        points: 100,
+        streak: 0,
+        rankIdx: 0,
+        voice: false,
+        ranks: ["F", "E", "D", "C", "B", "A", "S", "SS", "SSS", "SSSS"]
+    };
+
+    // Simulated Worldwide Data (In a real app, this comes from a Database)
+    const worldHunters = [
+        { name: "Saito_X", region: "ASIA", points: 25000, rank: "SS" },
+        { name: "Goliath", region: "NORTH_AM", points: 19000, rank: "S" },
+        { name: "Elena_V", region: "EUROPE", points: 12000, rank: "A" },
+        { name: "Hunter_Prime", region: "ASIA", points: 8000, rank: "B" }
+    ];
+
+    function systemSpeak(text) {
+        if (!state.voice) return;
+        synth.cancel();
+        const msg = new SpeechSynthesisUtterance(text);
+        const voices = synth.getVoices();
+        // Force high-quality Female System Voice
+        msg.voice = voices.find(v => (v.name.includes("Female") || v.name.includes("Google")) && v.lang.includes("en")) || voices[0];
+        msg.pitch = 1.1;
+        msg.rate = 1.0;
+        synth.speak(msg);
+    }
+
+    function activateVoice() {
+        state.voice = true;
+        systemSpeak("Global System Voice Online. Monitoring all hunters in this sector.");
+    }
+
+    function initializeGlobal() {
+        state.user = document.getElementById('username').value || "Unknown";
+        state.region = document.getElementById('region').value || "Global";
+        
+        document.getElementById('screen-auth').classList.add('hidden');
+        document.getElementById('screen-main').classList.remove('hidden');
+        document.getElementById('display-user').innerText = state.user.toUpperCase();
+        
+        systemSpeak(`Identification accepted. Welcome, Hunter ${state.user}. You are now connected to the worldwide system.`);
+        startLiveFeed();
+        updateLeaderboard();
+    }
+
+    function switchTab(type) {
+        document.getElementById('view-dash').classList.toggle('hidden', type !== 'dash');
+        document.getElementById('view-world').classList.toggle('hidden', type !== 'world');
+        document.getElementById('tab-dash').classList.toggle('active', type === 'dash');
+        document.getElementById('tab-world').classList.toggle('active', type === 'world');
+    }
+
+    function processGlobalProof(input) {
+        if (!input.files[0]) return;
+        systemSpeak("Uploading evidence to global server. Analyzing facial symmetry and acne markers.");
+        
+        setTimeout(() => {
+            state.streak++;
+            state.points += 500;
+            const advice = "System Analysis: Acne caused by high cortisol. Increase sleep and remove dairy. Your worldwide ranking has increased.";
+            document.getElementById('ai-msg').innerText = advice;
+            systemSpeak(advice);
+            updateUI();
+            if (state.streak >= 7) evolve();
+        }, 2000);
+    }
+
+    function evolve() {
+        state.rankIdx++;
+        state.streak = 0;
+        state.points += 5000;
+        const newRank = state.ranks[state.rankIdx];
+        systemSpeak(`Global Alert! Hunter ${state.user} has transcended to ${newRank} Rank. The world is taking notice.`);
+        updateUI();
+    }
+
+    function updateUI() {
+        const r = state.ranks[state.rankIdx];
+        document.getElementById('display-rank-letter').innerText = r;
+        document.getElementById('display-rank').innerText = r + "-RANK";
+        document.getElementById('ui-streak').innerText = `Day ${state.streak} of 7 towards Rank Evolution`;
+        if(state.rankIdx >= 6) document.getElementById('display-rank-letter').style.color = "var(--rank-s)";
+        updateLeaderboard();
+    }
+
+    function updateLeaderboard() {
+        const body = document.getElementById('leaderboard-body');
+        let hunters = [...worldHunters, { name: state.user, region: state.region, points: state.points, rank: state.ranks[state.rankIdx] }];
+        hunters.sort((a, b) => b.points - a.points);
+        
+        body.innerHTML = hunters.map((h, i) => `
+            <tr class="${h.name === state.user ? 'user-row' : ''}">
+                <td>${i+1}</td>
+                <td>${h.name} ${h.name === state.user ? '(YOU)' : ''}</td>
+                <td>${h.region}</td>
+                <td class="${h.rank.includes('S') ? 'rank-ssss-tag' : ''}">${h.rank}</td>
+            </tr>
+        `).join('');
+    }
+
+    function startLiveFeed() {
+        const feed = document.getElementById('live-feed');
+        const events = [
+            "Hunter 'Shadow' just reached B-Rank in ASIA",
+            "New dungeon cleared by 'Saito_X'",
+            "Global Average Rank is currently D-Rank",
+            "Hunter 'Goliath' is on a 30-day streak"
+        ];
+        setInterval(() => {
+            const rand = events[Math.floor(Math.random() * events.length)];
+            feed.innerText = `[WORLD-FEED]: ${rand}`;
+        }, 5000);
+    }
+
+    window.speechSynthesis.onvoiceschanged = () => synth.getVoices();
+</script>
+
+</body>
+</html>
